@@ -1,0 +1,51 @@
+package distance_balance
+class DistanceService {
+
+   public def distances(Map params){
+        println("Llego")
+        def hospitales = Hospital.list()
+        def distances = hospitales.collect {
+            def lat = Double.parseDouble(it.latitude)
+            def lng = Double.parseDouble(it.longitude)
+
+            def pLat = Double.parseDouble(params.lat)
+            def pLng = Double.parseDouble(params.lng)
+            distance(lat,lng,pLat,pLng)
+        }
+        println(params)
+        println(distances)
+        distances
+    }
+
+    private static final double EQUATORIAL_EARTH_RADIUS = 6378.1370;
+    private static final double DEG_TO_RAD = Math.PI / 180;
+
+    double distance(double lat1, double lon1, double lat2, double lon2) {
+        double dlong = (lon2 - lon1) * DEG_TO_RAD;
+        double dlat = (lat2 - lat1) * DEG_TO_RAD;
+        double a = Math.pow(Math.sin(dlat / 2), 2) + Math.cos(lat1 * DEG_TO_RAD) * Math.cos(lat2 * DEG_TO_RAD) * Math.pow(Math.sin(dlong / 2), 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double d = EQUATORIAL_EARTH_RADIUS * c;
+        return d * 1000;
+    }
+
+    double distanceToLine(
+            double pointLat, double pointLon, double lat1, double lon1, double lat2, double lon2) {
+        double d0 = distance(pointLat, pointLon, lat1, lon1);
+        double d1 = distance(lat1, lon1, lat2, lon2);
+        double d2 = distance(lat2, lon2, pointLat, pointLon);
+        if (Math.pow(d0, 2) > Math.pow(d1, 2) + Math.pow(d2, 2)) {
+            return d2;
+        }
+        if (Math.pow(d2, 2) > Math.pow(d1, 2) + Math.pow(d0, 2)) {
+            return d0;
+        }
+        double halfP = (d0 + d1 + d2) * 0.5;
+        double area = Math.sqrt(halfP * (halfP - d0) * (halfP - d1) * (halfP - d2));
+        return 2 * area / d1;
+    }
+
+
+
+
+}

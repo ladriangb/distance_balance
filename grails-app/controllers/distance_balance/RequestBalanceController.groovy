@@ -6,6 +6,7 @@ import static org.springframework.http.HttpStatus.*
 class RequestBalanceController {
 
     RequestBalanceService requestBalanceService
+    def distanceService
 
     static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
 
@@ -85,6 +86,14 @@ class RequestBalanceController {
             }
             '*'{ render status: NO_CONTENT }
         }
+    }
+
+    def generate(){
+
+        def result = distanceService.distances(params)
+
+
+        render(params.toString())
     }
 
     protected void notFound() {
