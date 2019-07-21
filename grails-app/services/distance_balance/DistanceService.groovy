@@ -1,6 +1,9 @@
 package distance_balance
 
 class DistanceService {
+    def isUnbalanced={radius, item->
+        return  item>radius
+    }
 
     def distances(Map params) {
         def hospitales = params.hospitales
@@ -21,14 +24,14 @@ class DistanceService {
         }
         def result = distances(params)
         def radius = Double.parseDouble(params.radius)
-        def D = result.findAll { it > radius }
+//        def D = result.findAll { it > radius }
+        def D = result.findAll { isUnbalanced( radius,it) }
         def B = result - D
         def sD = D.sum() ?: 0
         def sB = B.sum() ?: 0
         def calcule = []
         for (int i = 0; i < result.size(); i++) {
             for (int j = i + 1; j < result.size(); j++) {
-                print([i,j])
                 calcule.add(sD * sB * Math.abs(result[i] - result[j]))
             }
         }
