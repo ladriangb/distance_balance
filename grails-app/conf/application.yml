@@ -104,6 +104,14 @@ dataSource:
     username: sa
     password: ''
 
+#dataSource:
+#    pooled: true
+#    jmxExport: true
+#    driverClassName: org.postgresql.Driver # mofifcar segun el driver de acceso a la base de datos
+#    username: "${JDBC_USER_STRING}"
+#    password: "${JDBC_PASS_STRING}"
+#    url: "${JDBC_CONNECTION_STRING}"
+
 environments:
     development:
         dataSource:
