@@ -4,7 +4,7 @@ class Hospital {
     String latitude
     String longitude
     String name
-    boolean balanced
+//    boolean balanced
 
     static constraints = {
         name nullable: false

@@ -1,20 +1,48 @@
 package distance_balance
+
 class DistanceService {
 
-   public def distances(Map params){
-        println("Llego")
-        def hospitales = Hospital.list()
+    def distances(Map params) {
+        def hospitales = params.hospitales
         def distances = hospitales.collect {
             def lat = Double.parseDouble(it.latitude)
             def lng = Double.parseDouble(it.longitude)
-
             def pLat = Double.parseDouble(params.lat)
             def pLng = Double.parseDouble(params.lng)
-            distance(lat,lng,pLat,pLng)
+            distance(lat, lng, pLat, pLng)
         }
-        println(params)
-        println(distances)
         distances
+    }
+
+    def desbalances(Map params) {
+
+        params.hospitales = Hospital.list().collect {
+            [latitude: it.latitude, longitude: it.longitude]
+        }
+        def result = distances(params)
+        def radius = Double.parseDouble(params.radius)
+        def D = result.findAll { it > radius }
+        def B = result - D
+        def sD = D.sum() ?: 0
+        def sB = B.sum() ?: 0
+        def calcule = []
+        for (int i = 0; i < result.size(); i++) {
+            for (int j = i + 1; j < result.size(); j++) {
+                print([i,j])
+                calcule.add(sD * sB * Math.abs(result[i] - result[j]))
+            }
+        }
+
+        def requestBalance = new RequestBalance([
+                latitude        : params.lat,
+                longitude       : params.lng,
+                radio           : params.radius,
+                resultado       : calcule,
+                params          : params.toString(),
+                minimoDesbalance: calcule.min()
+        ])
+        requestBalance.save()
+        calcule.min()
     }
 
     private static final double EQUATORIAL_EARTH_RADIUS = 6378.1370;
@@ -26,26 +54,6 @@ class DistanceService {
         double a = Math.pow(Math.sin(dlat / 2), 2) + Math.cos(lat1 * DEG_TO_RAD) * Math.cos(lat2 * DEG_TO_RAD) * Math.pow(Math.sin(dlong / 2), 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         double d = EQUATORIAL_EARTH_RADIUS * c;
-        return d * 1000;
+        return Math.abs(d * 1000);
     }
-
-    double distanceToLine(
-            double pointLat, double pointLon, double lat1, double lon1, double lat2, double lon2) {
-        double d0 = distance(pointLat, pointLon, lat1, lon1);
-        double d1 = distance(lat1, lon1, lat2, lon2);
-        double d2 = distance(lat2, lon2, pointLat, pointLon);
-        if (Math.pow(d0, 2) > Math.pow(d1, 2) + Math.pow(d2, 2)) {
-            return d2;
-        }
-        if (Math.pow(d2, 2) > Math.pow(d1, 2) + Math.pow(d0, 2)) {
-            return d0;
-        }
-        double halfP = (d0 + d1 + d2) * 0.5;
-        double area = Math.sqrt(halfP * (halfP - d0) * (halfP - d1) * (halfP - d2));
-        return 2 * area / d1;
-    }
-
-
-
-
 }

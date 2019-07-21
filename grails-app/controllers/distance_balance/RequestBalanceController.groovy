@@ -89,11 +89,8 @@ class RequestBalanceController {
     }
 
     def generate(){
-
-        def result = distanceService.distances(params)
-
-
-        render(params.toString())
+        def result = distanceService.desbalances(params)
+        respond([minDesbalance:result])
     }
 
     protected void notFound() {
