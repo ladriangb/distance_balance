@@ -79,7 +79,8 @@
 
             xhttp.onreadystatechange = function () {
                 if (this.readyState == 4 && this.status == 200) {
-                    console.log(this.responseText);
+                    var json = JSON.parse(this.responseText);
+                    alert("minDesbalance: "+json.minDesbalance);
                 }
             };
             var path = "/requestBalance/generate.json?lat=_LAT&lng=_LNG&radius=_RADIUS"
